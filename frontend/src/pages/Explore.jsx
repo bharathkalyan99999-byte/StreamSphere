@@ -44,7 +44,7 @@ function Explore({
 
     try {
       const response = await fetch(
-        "http://localhost:5001/ai-search",
+        "https://streamsphere-backend-bk2026.azurewebsites.net/ai-search",
         {
           method: "POST",
           headers: {

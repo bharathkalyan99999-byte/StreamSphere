@@ -44,7 +44,7 @@ function Upload({
       );
 
       const response = await fetch(
-        "http://localhost:5001/ai-upload-assist",
+        "https://streamsphere-backend-bk2026.azurewebsites.net/ai-upload-assist",
         {
           method: "POST",
           headers: {
@@ -134,7 +134,7 @@ function Upload({
         localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5001/upload",
+        "https://streamsphere-backend-bk2026.azurewebsites.net/upload",
         {
           method: "POST",
           headers: {
@@ -231,13 +231,17 @@ function Upload({
 
           <br />
 
-          <div className="ai-upload-assistant">
+          <div className="ai-upload-section">
+
             <div className="ai-upload-header">
+
               <h3>✨ AI Upload Assistant</h3>
+
               <p>
                 Describe your video and AI will create the title,
                 description, category and hashtags.
               </p>
+
             </div>
 
             <textarea
@@ -265,6 +269,7 @@ function Upload({
                 {aiMessage}
               </p>
             )}
+
           </div>
 
           <div className="form-group">

@@ -26,7 +26,7 @@ function CreatorProfile({
         setLoading(true);
 
         const response = await fetch(
-          `http://localhost:5001/creators/${creatorId}`
+          `https://streamsphere-backend-bk2026.azurewebsites.net/creators/${creatorId}`
         );
 
         const data = await response.json();
@@ -74,7 +74,7 @@ function CreatorProfile({
 
     try {
       const response = await fetch(
-        `http://localhost:5001/users/${creatorId}/follow`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/users/${creatorId}/follow`,
         {
           method: "POST",
           headers: {

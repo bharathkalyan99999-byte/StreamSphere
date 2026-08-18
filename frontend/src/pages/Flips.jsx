@@ -12,6 +12,7 @@ import {
   Trash2
 } from "lucide-react";
 
+
 function Flips({
   videos = [],
   loggedInUser,
@@ -32,8 +33,61 @@ function Flips({
   const [hiddenVideos, setHiddenVideos] = useState(new Set());
   const [reportVideo, setReportVideo] = useState(null);
   const [reportReason, setReportReason] = useState("");
+
+  const [aiSummary, setAiSummary] = useState({});
+  const [summaryLoading, setSummaryLoading] = useState({});
   const [commentText, setCommentText] = useState("");
   const [commentToDelete, setCommentToDelete] = useState(null);
+
+
+  const handleGenerateSummary = async (video) => {
+    try {
+      setSummaryLoading((prev) => ({
+        ...prev,
+        [video.id]: true
+      }));
+
+      const response = await fetch(
+        "https://streamsphere-backend-bk2026.azurewebsites.net/ai-video-summary",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            title: video.title,
+            description: video.description
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to generate summary"
+        );
+      }
+
+      setAiSummary((prev) => ({
+        ...prev,
+        [video.id]: data.summary || ""
+      }));
+
+    } catch (error) {
+      console.error("AI summary error:", error);
+      alert(error.message || "Failed to generate AI summary");
+
+    } finally {
+      setSummaryLoading((prev) => ({
+        ...prev,
+        [video.id]: false
+      }));
+    }
+  };
+
+
+
 
   useEffect(() => {
     const container = containerRef.current;
@@ -66,6 +120,7 @@ function Flips({
     };
   }, []);
 
+
   useEffect(() => {
     videoRefs.current.forEach(
       (videoElement, index) => {
@@ -85,6 +140,7 @@ function Flips({
       }
     );
   }, [activeIndex, muted]);
+
 
   useEffect(() => {
     const initial = {};
@@ -128,7 +184,7 @@ function Flips({
 
     try {
       const response = await fetch(
-        `http://localhost:5001/users/${creatorId}/follow`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/users/${creatorId}/follow`,
         {
           method: "POST",
           headers: {
@@ -227,6 +283,7 @@ function Flips({
     }));
   };
 
+
   useEffect(() => {
     if (commentsVideo) {
       document.body.classList.add("comments-open");
@@ -248,7 +305,7 @@ function Flips({
 
     try {
       const response = await fetch(
-        `http://localhost:5001/videos/${commentsVideo.id}/comments/${comment.id}`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/videos/${commentsVideo.id}/comments/${comment.id}`,
         {
           method: "DELETE",
           headers: {
@@ -356,6 +413,41 @@ function Flips({
               {/* RIGHT SIDE BUTTONS */}
 
               <div className="flip-actions">
+
+                <button
+                  className="flip-action"
+                  onClick={() => handleGenerateSummary(video)}
+                  disabled={summaryLoading[video.id]}
+                >
+                  ✨
+                  <span>
+                    {summaryLoading[video.id]
+                      ? "Loading..."
+                      : "AI Summary"}
+                  </span>
+                </button>
+
+                {aiSummary[video.id] && (
+                  <div className="ai-summary-popup">
+                    <div className="ai-summary-title">
+                      ✨ AI Summary
+                    </div>
+                    <p>
+                      {aiSummary[video.id]}
+                    </p>
+                    <button
+                      className="ai-summary-close"
+                      onClick={() =>
+                        setAiSummary((prev) => ({
+                          ...prev,
+                          [video.id]: ""
+                        }))
+                      }
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
 
                 <button
                   className="flip-action"

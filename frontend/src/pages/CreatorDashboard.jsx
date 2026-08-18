@@ -190,7 +190,25 @@ function CreatorDashboard({
 
                     </div>
 
-                    <div className="dashboard-video-stats">
+                    <button
+  className="dashboard-delete-video"
+  onClick={(event) => {
+    event.stopPropagation();
+
+    if (
+      window.confirm(
+        "Are you sure you want to delete this video?"
+      )
+    ) {
+      onDelete?.(video);
+    }
+  }}
+  title="Delete video"
+>
+  <Trash2 size={20} />
+</button>
+
+<div className="dashboard-video-stats">
 
                       <span>
                         <Eye size={15} />

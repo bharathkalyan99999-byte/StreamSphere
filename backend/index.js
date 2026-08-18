@@ -1,7 +1,9 @@
 require("dotenv").config();
 
+const OLLAMA_URL =
+  "https://streamsphere-ollama.greenpebble-f818ef38.polandcentral.azurecontainerapps.io";
+
 const express = require("express");
-const OpenAI = require("openai");
 const cors = require("cors");
 const multer = require("multer");
 
@@ -19,12 +21,8 @@ const {
   profilePicturesContainer
 } = require("./blob");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 const app = express();
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 
 const upload = multer({
   storage: multer.memoryStorage()
@@ -65,40 +63,57 @@ app.post("/ai-search", async (req, res) => {
       tags: video.tags || []
     }));
 
-    const response =
-      await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI video search assistant.
+    const prompt = `You are an AI video search assistant.
 
 The user will search for videos using natural language.
 
-Your job is to identify the videos that best match the user's request.
+Identify the videos that best match the user's request.
 
-Return ONLY a JSON object in this exact format:
+Return ONLY valid JSON in this exact format:
 
 {"videoIds":["video-id-1","video-id-2"]}
 
-Only include IDs from the provided videos.`
-          },
-          {
-            role: "user",
-            content: JSON.stringify({
-              searchQuery: query,
-              videos: videoData
-            })
-          }
-        ],
-        response_format: {
-          type: "json_object"
-        }
-      });
+Only include IDs from the provided videos.
 
-    const result = JSON.parse(
-      response.choices[0].message.content
+Search request:
+${query}
+
+Videos:
+${JSON.stringify(videoData)}`;
+
+    const response = await fetch(
+      `${OLLAMA_URL}/api/generate`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama3.2:3b",
+          prompt,
+          stream: false,
+          format: "json"
+        })
+      }
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        "Ollama error:",
+        response.status,
+        errorText
+      );
+
+      throw new Error(
+        `Ollama request failed: ${response.status} ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    const result = JSON.parse(data.response);
 
     res.json({
       videoIds: result.videoIds || []
@@ -113,7 +128,6 @@ Only include IDs from the provided videos.`
   }
 });
 
-
 app.post("/ai-upload-assist", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -127,6 +141,7 @@ app.post("/ai-upload-assist", async (req, res) => {
     const aiPrompt = `You are an AI assistant for a video sharing platform.
 
 Based on the user's description, generate:
+
 1. A short, engaging video title
 2. A clear video description
 3. The best matching category
@@ -135,6 +150,7 @@ Based on the user's description, generate:
 Return ONLY valid JSON. No markdown. No explanation.
 
 Use exactly this format:
+
 {
   "title": "Example video title",
   "description": "Example description",
@@ -143,13 +159,15 @@ Use exactly this format:
 }
 
 Allowed categories are ONLY:
+
 Technology, Gaming, Travel, Education, Music, Sports, Fitness, Entertainment
 
 User's video description:
+
 ${prompt}`;
 
     const response = await fetch(
-      "http://127.0.0.1:11434/api/generate",
+      `${OLLAMA_URL}/api/generate`,
       {
         method: "POST",
         headers: {
@@ -165,16 +183,22 @@ ${prompt}`;
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        "Ollama error:",
+        response.status,
+        errorText
+      );
+
       throw new Error(
-        "Ollama request failed"
+        `Ollama request failed: ${response.status} ${errorText}`
       );
     }
 
     const data = await response.json();
 
-    const result = JSON.parse(
-      data.response
-    );
+    const result = JSON.parse(data.response);
 
     res.json({
       title: result.title || "",
@@ -186,13 +210,80 @@ ${prompt}`;
     });
 
   } catch (error) {
-    console.error(
-      "AI upload assistant error:",
-      error
-    );
+    console.error("AI upload assistant error:", error);
 
     res.status(500).json({
       error: "AI assistant failed"
+    });
+  }
+});
+
+app.post("/ai-video-summary", async (req, res) => {
+  try {
+    const { title, description } = req.body;
+
+    if (!title && !description) {
+      return res.status(400).json({
+        error: "Video information is required"
+      });
+    }
+
+    const aiPrompt = `Create a short and clear summary of this video based ONLY on the information provided below.
+
+Keep the summary between 2 and 4 sentences.
+
+Do not invent events or details that are not provided.
+
+Video title:
+
+${title || "Not provided"}
+
+Video description:
+
+${description || "Not provided"}
+
+Return only the summary text. No heading. No markdown.`;
+
+    const response = await fetch(
+      `${OLLAMA_URL}/api/generate`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama3.2:3b",
+          prompt: aiPrompt,
+          stream: false
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      console.error(
+        "Ollama error:",
+        response.status,
+        errorText
+      );
+
+      throw new Error(
+        `Ollama request failed: ${response.status} ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    res.json({
+      summary: data.response?.trim() || ""
+    });
+
+  } catch (error) {
+    console.error("AI video summary error:", error);
+
+    res.status(500).json({
+      error: "AI summary failed"
     });
   }
 });
@@ -781,7 +872,7 @@ app.post("/login", async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h"
+        expiresIn: "7d"
       }
     );
 

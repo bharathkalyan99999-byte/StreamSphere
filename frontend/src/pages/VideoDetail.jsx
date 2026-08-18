@@ -32,6 +32,74 @@ function ReelItem({
   const [expanded, setExpanded] =
     useState(false);
 
+  const [aiSummary, setAiSummary] =
+    useState("");
+
+  const [summaryLoading, setSummaryLoading] =
+    useState(false);
+
+  const handleGenerateSummary =
+    async () => {
+
+      try {
+
+        setSummaryLoading(true);
+
+        const response =
+          await fetch(
+            "https://streamsphere-backend-bk2026.azurewebsites.net/ai-video-summary",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                title: video.title,
+                description:
+                  video.description
+              })
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.error ||
+            "Failed to generate summary"
+          );
+
+        }
+
+        setAiSummary(
+          data.summary || ""
+        );
+
+      } catch (error) {
+
+        console.error(
+          "AI summary error:",
+          error
+        );
+
+        alert(
+          error.message ||
+          "Failed to generate AI summary"
+        );
+
+      } finally {
+
+        setSummaryLoading(false);
+
+      }
+
+    };
+
 
   useEffect(() => {
 
@@ -103,7 +171,7 @@ function ReelItem({
 
         const response =
           await fetch(
-            `http://localhost:5001/users/${video.uploaderId}/follow`,
+            `https://streamsphere-backend-bk2026.azurewebsites.net/users/${video.uploaderId}/follow`,
             {
               method: "POST",
 
@@ -255,6 +323,20 @@ function ReelItem({
         <div
           className="reel-actions"
         >
+
+          <button
+            className="reel-action ai-summary-action"
+            onClick={handleGenerateSummary}
+            disabled={summaryLoading}
+          >
+            ✨
+
+            <span>
+              {summaryLoading
+                ? "Loading..."
+                : "AI Summary"}
+            </span>
+          </button>
 
           <button
             className="reel-action"
@@ -562,6 +644,48 @@ function ReelItem({
                   : "More"}
 
               </button>
+
+            )}
+
+          </div>
+
+          <div className="ai-summary-section">
+
+            {!aiSummary ? (
+
+              <button
+                type="button"
+                className="ai-summary-button"
+                onClick={handleGenerateSummary}
+                disabled={summaryLoading}
+              >
+                {summaryLoading
+                  ? "Generating summary..."
+                  : "✨ Generate AI Summary"}
+              </button>
+
+            ) : (
+
+              <div className="ai-summary-box">
+
+                <strong>
+                  ✨ AI Video Summary
+                </strong>
+
+                <p>
+                  {aiSummary}
+                </p>
+
+                <button
+                  type="button"
+                  className="ai-summary-button"
+                  onClick={handleGenerateSummary}
+                  disabled={summaryLoading}
+                >
+                  Generate Again
+                </button>
+
+              </div>
 
             )}
 

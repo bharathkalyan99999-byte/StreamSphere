@@ -925,12 +925,6 @@ select {
   color: white;
   font-weight: 700;
 }
-  gap: 14px;
-  align-items: flex-start;
-  padding: 18px 20px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
 .comment-content {
   flex: 1;
 }
@@ -8522,4 +8516,298 @@ body.comments-open .bottom-nav {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* =========================================
+   AI VIDEO SUMMARY
+   ========================================= */
+
+.ai-summary-section {
+  margin-top: 12px;
+}
+
+.ai-summary-button {
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 20px;
+
+  padding: 8px 14px;
+
+  background: rgba(0,0,0,0.35);
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(8px);
+}
+
+.ai-summary-button:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.ai-summary-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.ai-summary-box {
+  max-width: 600px;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  background: rgba(0,0,0,0.55);
+
+  border: 1px solid rgba(255,255,255,0.2);
+
+  backdrop-filter: blur(10px);
+}
+
+.ai-summary-box strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: white;
+
+  font-size: 14px;
+}
+
+.ai-summary-box p {
+  margin: 0 0 10px;
+
+  color: white;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+
+  .ai-summary-section {
+    margin-top: 10px;
+  }
+
+  .ai-summary-button {
+    padding: 7px 12px;
+
+    font-size: 12px;
+  }
+
+  .ai-summary-box {
+    padding: 10px 12px;
+  }
+
+}
+
+
+/* AI SUMMARY POSITION FIX */
+
+.flips-page .reel-bottom {
+  bottom: 190px !important;
+}
+
+.flips-page .ai-summary-section {
+  display: block !important;
+  margin-top: 12px !important;
+  position: relative !important;
+  z-index: 300 !important;
+}
+
+.flips-page .ai-summary-button {
+  display: inline-block !important;
+  position: relative !important;
+  z-index: 300 !important;
+}
+
+
+/* FINAL AI SUMMARY VISIBILITY FIX */
+
+.flips-page .reel-bottom {
+  bottom: 220px !important;
+  z-index: 9999 !important;
+  overflow: visible !important;
+}
+
+.flips-page .ai-summary-section {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+  margin-top: 15px !important;
+}
+
+.flips-page .ai-summary-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10000 !important;
+}
+
+
+/* FIX AI SUMMARY VISIBILITY */
+
+.flips-page .reel-item {
+  overflow: visible !important;
+}
+
+.flips-page .reel-video-container {
+  overflow: visible !important;
+}
+
+.flips-page .reel-bottom {
+  bottom: 100px !important;
+  max-height: 45vh !important;
+  overflow-y: auto !important;
+  padding-right: 8px !important;
+  z-index: 100 !important;
+}
+
+.flips-page .ai-summary-section {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-top: 12px !important;
+}
+
+.flips-page .ai-summary-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+
+/* =========================================
+   AI SUMMARY RIGHT ACTION - FINAL FIX
+   ========================================= */
+
+.flips-page .reel-actions {
+  overflow: visible !important;
+}
+
+.flips-page .ai-summary-action {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  width: 55px !important;
+  min-height: 55px !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+
+  border: none !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+
+  color: white !important;
+  cursor: pointer !important;
+
+  border-radius: 50% !important;
+
+  z-index: 99999 !important;
+}
+
+.flips-page .ai-summary-action span {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  font-size: 9px !important;
+  color: white !important;
+  white-space: nowrap !important;
+}
+
+.flips-page .ai-summary-action:disabled {
+  opacity: 0.6 !important;
+}
+
+
+.flips-page .ai-summary-popup {
+  position: absolute;
+  right: 85px;
+  bottom: 110px;
+  width: min(320px, calc(100vw - 120px));
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(25, 25, 25, 0.96);
+  color: white;
+  z-index: 100;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+.flips-page .ai-summary-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.flips-page .ai-summary-popup p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e4e4e7;
+}
+
+.flips-page .ai-summary-close {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .flips-page .ai-summary-popup {
+    right: 70px;
+    bottom: 100px;
+  }
+}
+
+/* DELETE BUTTON - BOTTOM RIGHT */
+.dashboard-delete-video {
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 12px !important;
+  top: auto !important;
+  z-index: 30 !important;
+
+  width: 42px !important;
+  height: 42px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid rgba(255,255,255,0.25) !important;
+  border-radius: 50% !important;
+
+  background: rgba(0,0,0,0.7) !important;
+  color: white !important;
+
+  cursor: pointer !important;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  transition: all 0.2s ease;
+}
+
+.dashboard-delete-video:hover {
+  background: rgba(220,38,38,0.9) !important;
+  transform: scale(1.08);
+}
+
+.dashboard-video-stats {
+  right: 70px !important;
 }

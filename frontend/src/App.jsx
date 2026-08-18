@@ -48,7 +48,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/videos"
+        "https://streamsphere-backend-bk2026.azurewebsites.net/videos"
       );
 
       const data = await response.json();
@@ -89,7 +89,7 @@ function App() {
   ) => {
     try {
       const response = await fetch(
-        "http://localhost:5001/register",
+        "https://streamsphere-backend-bk2026.azurewebsites.net/register",
         {
           method: "POST",
 
@@ -139,7 +139,7 @@ function App() {
   ) => {
     try {
       const response = await fetch(
-        "http://localhost:5001/login",
+        "https://streamsphere-backend-bk2026.azurewebsites.net/login",
         {
           method: "POST",
 
@@ -217,7 +217,7 @@ function App() {
   const updateProfilePicture = async (imageUrl) => {
     try {
       const response = await fetch(
-        `http://localhost:5001/users/${loggedInUser.id}/profile-picture`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/users/${loggedInUser.id}/profile-picture`,
         {
           method: "PUT",
           headers: {
@@ -273,8 +273,8 @@ function App() {
   const handleVideoClick = async (video) => {
   try {
     const response = await fetch(
-      `http://localhost:5001/videos/${video.id}/view`,
-      {
+        `https://streamsphere-backend-bk2026.azurewebsites.net/videos/${video.id}`,
+        {
         method: "POST"
       }
     );
@@ -327,7 +327,7 @@ function App() {
       }
 
       const response = await fetch(
-        `http://localhost:5001/videos/${video.id}/like`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/videos/${video.id}/like`,
         {
           method: "POST",
           headers: {
@@ -390,7 +390,7 @@ function App() {
       }
 
       const response = await fetch(
-        `http://localhost:5001/videos/${video.id}/comments`,
+        `https://streamsphere-backend-bk2026.azurewebsites.net/videos/${video.id}/comments`,
         {
           method: "POST",
           headers: {
@@ -453,15 +453,28 @@ function App() {
   // UPLOAD SUCCESS
   // -------------------------
 
-  const handleUploadSuccess = (
-    newVideo
-  ) => {
-    setVideos((previousVideos) => [
-      newVideo,
-      ...previousVideos
-    ]);
+  const handleUploadSuccess = async (newVideo) => {
 
-    setCurrentPage("explore");
+    try {
+
+      await exploreVideos();
+
+    } catch (error) {
+
+      console.error(
+        "Error refreshing videos after upload:",
+        error
+      );
+
+      setVideos((previousVideos) => [
+        newVideo,
+        ...previousVideos
+      ]);
+
+    }
+
+    setCurrentPage("dashboard");
+
   };
   const handleDeleteVideo = async (video) => {
     const confirmed = window.confirm(
@@ -474,7 +487,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/videos/${video.id}`,
+        "https://streamsphere-backend-bk2026.azurewebsites.net/videos/" + video.id,
         {
           method: "DELETE"
         }
