@@ -12,7 +12,12 @@ function Upload({
   const [description, setDescription] =
     useState("");
   const [category, setCategory] =
+
     useState("Technology");
+
+  const [ageRating, setAgeRating] =
+
+    useState("General");
 
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
@@ -71,6 +76,10 @@ function Upload({
       setCategory(
         data.category || "Technology"
       );
+
+      setAgeRating(
+        data.ageRating || "General"
+      );
       setTags(
         Array.isArray(data.tags)
           ? data.tags
@@ -123,6 +132,14 @@ function Upload({
     );
 
     formData.append(
+
+      "ageRating",
+
+      ageRating
+
+    );
+
+    formData.append(
       "tags",
       tags.join(",")
     );
@@ -160,6 +177,8 @@ function Upload({
       setTitle("");
       setDescription("");
       setCategory("Technology");
+
+      setAgeRating("General");
       setTags([]);
       setTagInput("");
 
@@ -320,6 +339,25 @@ function Upload({
           </div>
 
           <div className="form-group">
+            <label>Age Rating</label>
+
+            <select
+              value={ageRating}
+              onChange={(event) =>
+                setAgeRating(event.target.value)
+              }
+            >
+              <option value="General">General</option>
+              <option value="PG">PG</option>
+              <option value="12">12</option>
+              <option value="15">15</option>
+              <option value="18">18</option>
+            </select>
+
+          </div>
+
+          <div className="form-group">
+
             <label>Tags</label>
 
             <div className="tags-input-container">

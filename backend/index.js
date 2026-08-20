@@ -18,7 +18,8 @@ const jwt = require("jsonwebtoken");
 const { videosContainer,usersContainer } = require("./cosmos");
 const {
   videoContainer: containerClient,
-  profilePicturesContainer
+  profilePicturesContainer,
+  getProfilePictureUrl
 } = require("./blob");
 
 const app = express();
@@ -146,6 +147,7 @@ Based on the user's description, generate:
 2. A clear video description
 3. The best matching category
 4. 3 to 6 relevant hashtags
+5. The appropriate age rating
 
 Return ONLY valid JSON. No markdown. No explanation.
 
@@ -155,12 +157,17 @@ Use exactly this format:
   "title": "Example video title",
   "description": "Example description",
   "category": "Technology",
+  "ageRating": "General",
   "tags": ["#example", "#video"]
 }
 
 Allowed categories are ONLY:
 
 Technology, Gaming, Travel, Education, Music, Sports, Fitness, Entertainment
+
+Allowed age ratings are ONLY:
+
+General, PG, 12, 15, 18
 
 User's video description:
 
@@ -204,6 +211,7 @@ ${prompt}`;
       title: result.title || "",
       description: result.description || "",
       category: result.category || "Technology",
+      ageRating: result.ageRating || "General",
       tags: Array.isArray(result.tags)
         ? result.tags
         : []
@@ -354,7 +362,7 @@ app.get("/videos", async (req, res) => {
             return {
               ...video,
               uploaderProfilePicture:
-                creator?.profilePicture || null
+                getProfilePictureUrl(creator?.profilePicture)
             };
 
           } catch (error) {
@@ -445,6 +453,7 @@ app.post(
         title,
         description,
         category,
+        ageRating,
         tags
       } = req.body;
 
@@ -471,6 +480,9 @@ app.post(
           description || "",
         category:
           category || "General",
+
+        ageRating:
+          ageRating || "General",
         tags: tags
           ? tags
               .split(",")
@@ -884,7 +896,7 @@ app.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        profilePicture: user.profilePicture || null
+        profilePicture: getProfilePictureUrl(user.profilePicture)
       }
     });
 
@@ -1009,7 +1021,7 @@ app.put("/users/:id/profile-picture", async (req, res) => {
       `${blockBlobClient.url}?${sasToken}`;
 
     user.profilePicture =
-      profilePictureUrl;
+      blobName;
 
     const { resource: updatedUser } =
       await usersContainer
@@ -1025,7 +1037,7 @@ app.put("/users/:id/profile-picture", async (req, res) => {
         email: updatedUser.email,
         role: updatedUser.role,
         profilePicture:
-          updatedUser.profilePicture
+          getProfilePictureUrl(updatedUser.profilePicture)
       }
     });
 
@@ -1268,7 +1280,7 @@ app.get("/creators/:id", async (req, res) => {
         name: creator.name,
         role: creator.role,
         profilePicture:
-          creator.profilePicture || null,
+          getProfilePictureUrl(creator.profilePicture),
 
         followersCount:
           creator.followers

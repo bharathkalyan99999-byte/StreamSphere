@@ -1,7 +1,10 @@
 require("dotenv").config();
 
 const {
-  BlobServiceClient
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+  generateBlobSASQueryParameters,
+  BlobSASPermissions
 } = require("@azure/storage-blob");
 
 const blobServiceClient =
@@ -17,7 +20,51 @@ const profilePicturesContainer =
     "profile-pictures"
   );
 
+
+const getProfilePictureUrl = (blobName) => {
+  if (!blobName) return null;
+
+  // Support old records that still contain a full URL
+  if (blobName.startsWith("http")) {
+    return blobName;
+  }
+
+  const accountName =
+    process.env.AZURE_STORAGE_ACCOUNT_NAME;
+
+  const accountKey =
+    process.env.AZURE_STORAGE_ACCOUNT_KEY;
+
+  const sharedKeyCredential =
+    new StorageSharedKeyCredential(
+      accountName,
+      accountKey
+    );
+
+  const sasToken =
+    generateBlobSASQueryParameters(
+      {
+        containerName: "profile-pictures",
+        blobName,
+        permissions:
+          BlobSASPermissions.parse("r"),
+        startsOn: new Date(),
+        expiresOn: new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        )
+      },
+      sharedKeyCredential
+    ).toString();
+
+  const blockBlobClient =
+    profilePicturesContainer
+      .getBlockBlobClient(blobName);
+
+  return `${blockBlobClient.url}?${sasToken}`;
+};
+
 module.exports = {
   videoContainer,
-  profilePicturesContainer
+  profilePicturesContainer,
+  getProfilePictureUrl
 };
